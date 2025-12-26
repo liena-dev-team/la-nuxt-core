@@ -6,8 +6,8 @@
 					<v-card>
 						<v-card-title>Categories</v-card-title>
 						<v-card-text>
-							<AdvancedTree ref="advanced_tree" :filter_url="FILTER_URL" key_title="name"
-								@node:activated="onSelectCategory"></AdvancedTree>
+							<advanced-tree ref="advanced_tree" :filter_url="FILTER_URL" key_title="name"
+								@node:activated="onSelectCategory"></advanced-tree>
 						</v-card-text>
 						<v-divider></v-divider>
 						<v-card-actions>
@@ -39,7 +39,6 @@
 </template>
 
 <script setup>
-import AdvancedTree from 'la-ecom-2-admin-core/app/components/advanced-tree.vue';
 // Constants
 const FILTER_URL = "/admin/catalog/category/filter";
 const ATTRIBUTE_DEP_FILTER_URL = "/admin/catalog/attribute-dependency/filter"; // Unused with static sample

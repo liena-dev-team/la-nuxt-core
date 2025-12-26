@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-
+import { FIELD_TREE } from '../../utils/constant.js';
 /**
 	Example Data:
 	const nodes = ref([

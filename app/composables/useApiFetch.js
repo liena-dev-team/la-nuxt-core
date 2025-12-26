@@ -1,4 +1,4 @@
-import { useRequestHeaders } from '#app';
+import { useRequestHeaders } from '#imports';
 
 export const useApiFetch = async (url, opts) => {
 	const headers = useRequestHeaders(['cookie'])

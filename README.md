@@ -97,15 +97,7 @@ import { media_manager } from 'la-ecom-2-admin-core/app/plugins/media_manager.js
 import { HTTP_METHOD } from 'la-ecom-2-admin-core/app/utils/constant.js';
 ```
 
-## Xuất khẩu tổng hợp
-
 ```js
 import { ... } from 'la-ecom-2-admin-core';
 ```
 
-## Build & Publish
-
-- Build: `npm run build`
-- Publish: `npm publish`
-
-> Đảm bảo đã cập nhật version trước khi publish.

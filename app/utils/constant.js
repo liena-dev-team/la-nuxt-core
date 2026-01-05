@@ -1,12 +1,10 @@
 
-// Application Environment Mode
 export const ENVIRONMENT = {
 	DEV: "dev",
 	TEST: "test",
 	LIVE: "live",
 };
 
-// Application Environment Mode
 export const ENVIRONMENT_OPTIONS = [
 	{
 		title: "DEV",
@@ -133,9 +131,9 @@ export const FIELD_SORT = {
 	DESCENDING: "DESC",
 };
 
-/**
- * FIELD TREE
- */
+// /**
+//  * FIELD TREE
+//  */
 export const FIELD_TREE = {
 	SELECT_TYPE_NONE: "none",
 	SELECT_TYPE_LEAF: "leaf",

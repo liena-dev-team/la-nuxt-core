@@ -1,7 +1,0 @@
-{
-	"files": {
-	  "main.js": "/_nuxt/main.js",
-	  "main.css": "/_nuxt/main.css"
-	},
-	"entrypoints": ["main.js", "main.css"]
-  }

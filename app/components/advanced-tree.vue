@@ -18,9 +18,6 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, defineExpose } from 'vue';
-import { FIELD_TREE, HTTP_METHOD } from 'la-ecom-2-admin-core/app/utils/constant.js';
-import { useApiFetch } from 'la-ecom-2-admin-core/app/composables/useApiFetch.js';
 /**
 	Example Data:
 	const nodes = ref([

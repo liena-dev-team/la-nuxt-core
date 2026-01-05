@@ -3,7 +3,7 @@
 		<v-card>
 			<v-card-title>Media Files</v-card-title>
 			<v-card-text>
-				<advanced-tree-test :nodes="file_tree" :parse_records="false" :open_on_select="true"
+				<advanced-tree :nodes="file_tree" :parse_records="false" :open_on_select="true"
 					@node:activated="onLabelSelected">
 					<template #['prepend']="{ element }">
 						<div class="folder-icon">
@@ -13,7 +13,7 @@
 					<template #['label']="{ element }">
 						{{ element.title }}
 					</template>
-				</advanced-tree-test>
+				</advanced-tree>
 			</v-card-text>
 			<v-divider></v-divider>
 			<v-card-actions>

@@ -83,7 +83,9 @@ function onClickRemoveRecord(index) {
 			border-radius: 8px;
 			border: 1px solid #ccc;
 			gap: 8px;
-
+			max-height: 300px;
+    		overflow-y: scroll;
+			
 			.record {
 				padding: 4px 8px;
 				border: 1px solid #ccc;

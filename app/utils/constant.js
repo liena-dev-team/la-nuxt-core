@@ -171,6 +171,7 @@ export const PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE = {
 	EDIT: "edit",
 	DELETE: "delete",
 	SELECT_MORE: "select_more",
+	RUN_NOW: "run_now",
 };
 
 export const PAGE_LIST_HEADER_TYPE = {

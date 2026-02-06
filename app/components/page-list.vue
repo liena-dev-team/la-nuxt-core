@@ -80,7 +80,8 @@
 								<page-list-record v-for="(record, index) in records" :key="record[primary_field?.code]"
 									:record="record" :headers="headers" :show_selectbox="show_selectbox"
 									:form_mode="form_mode" :view_path="page_path + VIEW_PATH"
-									:insertable="page_insertable" :editable="page_editable" :deletable="page_deletable"
+									:extra_menu_items="extra_menu_items" :insertable="page_insertable"
+									:editable="page_editable" :deletable="page_deletable"
 									@menu-item-selected="onSelectRowSubMenuItem" :has_card_page="has_card_page"
 									@record-selected="onRecordSelected" @click="onClickRecord(record)"
 									@field:change="onChangeField" @field:blur="onBlurField">
@@ -171,7 +172,7 @@ const is_loading = defineModel('is_loading', { default: false });
 
 // Props
 const { page_caption, page_class, readable, editable, insertable, deletable, exportable,
-	select_mode, select_multiple, selected_record_label, load_selected_records
+	select_mode, select_multiple, selected_record_label, load_selected_records, extra_menu_items
 } = defineProps({
 	page_caption: {
 		type: String,
@@ -228,6 +229,10 @@ const { page_caption, page_class, readable, editable, insertable, deletable, exp
 	has_card_page: {
 		type: Boolean,
 		default: true
+	},
+	extra_menu_items: {
+		type: Object,
+		default: () => ({})
 	}
 });
 
@@ -268,7 +273,8 @@ const saved_expressions = reactive({});
 const emit = defineEmits([
 	"loaded",
 	"record:delete", "records:delete", "records:change",
-	"update:selected_records", "update:before"
+	"update:selected_records", "update:before",
+	"run-now"
 ]);
 
 // Expose
@@ -295,6 +301,9 @@ function onSelectRowSubMenuItem(data) {
 				data: data.record,
 			};
 
+			break;
+		case PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.RUN_NOW:
+			emit('run-now', data.record)
 			break;
 		case PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.SELECT_MORE: // Show More
 			selected_records.value.push(data.record);
@@ -471,7 +480,7 @@ async function onDoFilter(reset_page = false) {
 					new_filter.expression = `${startStr}${STRING_VALUES_SEPERATOR}${endStr}`;
 				} else if (filter.expression) {
 					new_filter.expression = "";
-				} 
+				}
 				break;
 			case FIELD_INPUT_TYPE.DATE_TIME:
 				if (Array.isArray(filter.expression) && filter.expression.length === 2) {
@@ -625,7 +634,6 @@ async function requestFilter(new_filter_request) {
 	if (!new_filter_request) {
 		return;
 	}
-	
 	if (typeof new_filter_request.toArray !== "function") {
 		new_filter_request = new FilterRequest(
 			new_filter_request.pagination,
@@ -793,7 +801,7 @@ async function requestUpdate(record) {
 		method: HTTP_METHOD.PUT,
 		body: record
 	});
-
+	
 	if (!response_data.result) {
 		// TODO: Process false result
 	}
@@ -844,7 +852,7 @@ function initRecords() {
 
 	Object.entries(sessionData).forEach(([page, filterObj]) => {
 		if (!filterObj || Object.keys(filterObj).length === 0) {
-		delete sessionData[page];
+			delete sessionData[page];
 		}
 	});
 	sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
@@ -1011,31 +1019,31 @@ async function init() {
 }
 
 watch(added_filters, (val) => {
-  const sessionKey = SESSION_STORAGE_KEY;
-  const currentPage = window.location.pathname;
-  const sessionData = JSON.parse(sessionStorage.getItem(sessionKey) || "{}");
+	const sessionKey = SESSION_STORAGE_KEY;
+	const currentPage = window.location.pathname;
+	const sessionData = JSON.parse(sessionStorage.getItem(sessionKey) || "{}");
 
-  sessionData[currentPage] = {};
+	sessionData[currentPage] = {};
 
-  Object.entries(val).forEach(([field_code, filter]) => {
-    let expr = filter.expression;
+	Object.entries(val).forEach(([field_code, filter]) => {
+		let expr = filter.expression;
 
-    if (filter.field.input_type === FIELD_INPUT_TYPE.DATE) {
-      if (Array.isArray(expr)) {
-        expr = `${formatMySQLDate(expr[0])}|${formatMySQLDate(expr[1])}`;
-      }
-    }
+		if (filter.field.input_type === FIELD_INPUT_TYPE.DATE) {
+			if (Array.isArray(expr)) {
+				expr = `${formatMySQLDate(expr[0])}|${formatMySQLDate(expr[1])}`;
+			}
+		}
 
-    if (filter.field.input_type === FIELD_INPUT_TYPE.DATE_TIME) {
-      if (Array.isArray(expr)) {
-        expr = `${formatMySQLDateTime(expr[0])}|${formatMySQLDateTime(expr[1])}`;
-      }
-    }
+		if (filter.field.input_type === FIELD_INPUT_TYPE.DATE_TIME) {
+			if (Array.isArray(expr)) {
+				expr = `${formatMySQLDateTime(expr[0])}|${formatMySQLDateTime(expr[1])}`;
+			}
+		}
 
-    sessionData[currentPage][field_code] = expr;
-  });
+		sessionData[currentPage][field_code] = expr;
+	});
 
-  sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
+	sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
 }, { deep: true });
 
 onMounted(init);

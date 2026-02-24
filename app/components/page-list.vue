@@ -233,17 +233,10 @@ const { page_caption, page_class, readable, editable, insertable, deletable, exp
 		type: Boolean,
 		default: true
 	},
-<<<<<<< HEAD
-	page_run_now: {
-		type: Boolean,
-		default: false,
-	},
-=======
 	initial_filters: {
 		type: Array,
 		default: []
 	}
->>>>>>> master
 });
 
 // Refs

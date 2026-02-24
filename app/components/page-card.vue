@@ -522,8 +522,6 @@ function getEncryptedPhoneDisplayValue(field) {
 
 function onEncryptedPhoneInput(field, value) {
 	const state = getEncryptedPhoneState(field.code);
-	console.log('state', state);
-	console.log('state', value);
 	if (state.show) {
 		record.value[field.code] = value;
 	}
@@ -685,7 +683,6 @@ async function onValueChange(field) {
 }
 
 async function saveFieldValue(field) {
-	console.log('saveFieldValue', field);
 	if (form_mode.value == FORM_MODE.VIEW) {
 		return;
 	}

@@ -28,6 +28,10 @@
 						prepend-icon="mdi-trash-can" size="small" color="red" variant="elevated">
 						<span>Delete {{ selected_records.length }} Selected</span>
 					</v-btn>
+					<v-btn v-if="page_run_now && selected_records.length > 0" @click="runNowSelected" prepend-icon="mdi-play"
+						size="small" color="green" variant="elevated">
+						<span>Run Now {{ selected_records.length }} Selected</span>
+					</v-btn>
 					<v-btn v-if="page_exportable" color="primary" size="small" variant="elevated" @click="exportFile">
 						<span>Export file</span>
 					</v-btn>
@@ -80,7 +84,7 @@
 								<page-list-record v-for="(record, index) in records" :key="record[primary_field?.code]"
 									:record="record" :headers="headers" :show_selectbox="show_selectbox"
 									:form_mode="form_mode" :view_path="page_path + VIEW_PATH"
-									:extra_menu_items="extra_menu_items" :insertable="page_insertable"
+									:insertable="page_insertable"
 									:editable="page_editable" :deletable="page_deletable"
 									@menu-item-selected="onSelectRowSubMenuItem" :has_card_page="has_card_page"
 									@record-selected="onRecordSelected" @click="onClickRecord(record)"
@@ -172,7 +176,7 @@ const is_loading = defineModel('is_loading', { default: false });
 
 // Props
 const { page_caption, page_class, readable, editable, insertable, deletable, exportable,
-	select_mode, select_multiple, selected_record_label, load_selected_records, extra_menu_items
+	select_mode, select_multiple, selected_record_label, load_selected_records, page_run_now
 } = defineProps({
 	page_caption: {
 		type: String,
@@ -230,10 +234,10 @@ const { page_caption, page_class, readable, editable, insertable, deletable, exp
 		type: Boolean,
 		default: true
 	},
-	extra_menu_items: {
-		type: Object,
-		default: () => ({})
-	}
+	page_run_now: {
+		type: Boolean,
+		default: false,
+	},
 });
 
 // Refs
@@ -300,10 +304,6 @@ function onSelectRowSubMenuItem(data) {
 				id: data.record[primary_field_code],
 				data: data.record,
 			};
-
-			break;
-		case PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.RUN_NOW:
-			emit('run-now', data.record)
 			break;
 		case PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.SELECT_MORE: // Show More
 			selected_records.value.push(data.record);
@@ -428,6 +428,16 @@ function showSelectBox(val) {
 		});
 
 		emit("update:selected_records", selected_records.value);
+	}
+}
+
+function runNowSelected() {
+	if (selected_records.value.length <= 0) {
+		return;
+	}
+
+	for (const record of selected_records.value) {
+		emit('run-now', record)
 	}
 }
 
@@ -801,7 +811,6 @@ async function requestUpdate(record) {
 		method: HTTP_METHOD.PUT,
 		body: record
 	});
-	
 	if (!response_data.result) {
 		// TODO: Process false result
 	}

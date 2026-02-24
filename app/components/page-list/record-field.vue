@@ -159,7 +159,7 @@ const emit = defineEmits(['field:change', 'field:blur', 'menu-item-selected', 'u
 
 const {
 	field, header, show_selectbox, form_mode,
-	editable, insertable, deletable, has_card_page, extra_menu_items
+	editable, insertable, deletable, has_card_page
 } = defineProps({
 	field: Object,
 	header: Object,
@@ -191,10 +191,6 @@ const {
 		type: Boolean,
 		default: true
 	},
-	extra_menu_items: {
-		type: Object,
-		default: () => ({})
-	}
 });
 
 // Computed
@@ -234,8 +230,6 @@ function onShowSubMenu() {
 	if (deletable) {
 		items.value[PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.DELETE] = MENU_ITEM_DELETE;
 	}
-
-	Object.assign(items.value, extra_menu_items);
 
 	items.value[PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.SELECT_MORE] = MENU_ITEM_SELECT_MORE;
 }

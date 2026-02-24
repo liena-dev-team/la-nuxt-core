@@ -14,7 +14,7 @@
 
 		<!-- Dropdown -->
 		<page-list-record-field :field="field_dropdown_menu" :header="headers[PAGE_LIST_HEADER_TYPE.DROPDOWN_MENU]"
-			:form_mode="form_mode" :is_editing="record._is_editng" :extra_menu_items="extra_menu_items"
+			:form_mode="form_mode" :is_editing="record._is_editng"
 			:insertable="insertable" :editable="editable" :deletable="deletable" :has_card_page="has_card_page"
 			:show_selectbox="show_selectbox" @menu-item-selected="onMenuItemSelected">
 		</page-list-record-field>
@@ -41,7 +41,7 @@ const SLOT_KEY_FIELD = "field:";
 
 // Props
 const { record, headers, show_selectbox, view_path, 
-	selected_ids, editable, insertable, has_card_page, extra_menu_items
+	selected_ids, editable, insertable, has_card_page
 } = defineProps({
 	record: {
 		type: Object,
@@ -81,10 +81,6 @@ const { record, headers, show_selectbox, view_path,
 		type: Boolean,
 		default: true
 	},
-	extra_menu_items: {
-		type: Object,
-		default: () => ({})
-	}
 });
 
 // Emits

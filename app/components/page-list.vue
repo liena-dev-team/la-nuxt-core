@@ -167,7 +167,6 @@ const EXPORT_URL = "/export";
 const SESSION_STORAGE_KEY = "admin:filter";
 
 // Model
-const filter_request = defineModel('filter_request');
 const selected_records = defineModel('selected_records', { default: [] });
 const form_messages = defineModel('form_messages', { default: [] });
 const form_mode = defineModel('form_mode', { default: FORM_MODE.VIEW });
@@ -176,7 +175,7 @@ const is_loading = defineModel('is_loading', { default: false });
 
 // Props
 const { page_caption, page_class, readable, editable, insertable, deletable, exportable,
-	select_mode, select_multiple, selected_record_label, load_selected_records, page_run_now
+	select_mode, select_multiple, selected_record_label, load_selected_records, initial_filters
 } = defineProps({
 	page_caption: {
 		type: String,
@@ -234,10 +233,17 @@ const { page_caption, page_class, readable, editable, insertable, deletable, exp
 		type: Boolean,
 		default: true
 	},
+<<<<<<< HEAD
 	page_run_now: {
 		type: Boolean,
 		default: false,
 	},
+=======
+	initial_filters: {
+		type: Array,
+		default: []
+	}
+>>>>>>> master
 });
 
 // Refs
@@ -249,6 +255,7 @@ const page_readable = ref(false);
 const page_editable = ref(false);
 const page_deletable = ref(false);
 const page_exportable = ref(false);
+const filter_request = ref();
 
 const actions = ref([]);
 const is_saved = ref(true);
@@ -473,8 +480,14 @@ async function onDoFilter(reset_page = false) {
 
 	sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
 
-	// Make filters: convert added_filters to class FilterRequest
-	const filters = [];
+	// Make filters: 
+	let filters = [];
+	// Combine with initial filter request
+	if (initial_filters && initial_filters.length > 0) {
+		filters = initial_filters;
+	}
+	
+	// Convert added filters to class FilterRequest
 	Object.entries(added_filters.value).forEach(function ([key, filter]) {
 		let new_filter = { ...filter };
 
@@ -831,9 +844,9 @@ async function loadRecordsByIds(record_ids) {
 	}
 
 	const filter_expression = record_ids.join(STRING_VALUES_SEPERATOR);
-	let filter_request = new FilterRequest();
-	filter_request.pagination.size = -1;
-	filter_request.filters = [{
+	let load_filter_request = new FilterRequest();
+	load_filter_request.pagination.size = -1;
+	load_filter_request.filters = [{
 		field: {
 			code: primary_field.value.code
 		},
@@ -844,7 +857,7 @@ async function loadRecordsByIds(record_ids) {
 	const response_data = await useApiFetch(
 		controller_url.value + FILTER_URL, {
 		method: HTTP_METHOD.POST,
-		body: filter_request.toArray()
+		body: load_filter_request.toArray()
 	});
 	is_loading.value = false;
 

@@ -50,7 +50,7 @@
 				<v-card-text>
 					<page-list ref="ref_page_list" select_mode :show_toolbar="false" :select_multiple="field_lookup.multiple"
 						:page_class="field_lookup.page_class" :editable="false" :insertable="false"
-						:page_path="field_lookup.page_path" :filter_request="filter_request"
+						:page_path="field_lookup.page_path" :initial_filters="initial_filters"
 						:selected_record_label="field_lookup.key_label" v-model:selected_records="records_in_list"
 						@loaded="loadSelectedRecords" load_selected_records>
 					</page-list>
@@ -76,7 +76,7 @@ const emit = defineEmits(["done","update:selected_ids_str"]);
 const selected_ids_str = defineModel('selected_ids_str', { default: "" });
 
 // Props
-const { mode, field, filter_request, show_result, show_mode, selected_records } = defineProps({
+const { mode, field, initial_filters, show_result, show_mode, selected_records } = defineProps({
 	mode: {
 		type: String,
 		default: ""
@@ -89,9 +89,9 @@ const { mode, field, filter_request, show_result, show_mode, selected_records } 
 		type: Array,
 		default: []
 	},
-	filter_request: {
-		type: FilterRequest,
-		default: new FilterRequest()
+	initial_filters: {
+		type: Array,
+		default: []
 	},
 	show_result: {
 		type: Boolean,

@@ -150,7 +150,7 @@
 		<v-dialog v-model="encrypt_dialog_open" max-width="480" persistent
 			@click:outside="close_encrypt_dialog" @update:model-value="on_encrypt_dialog_model_change">
 			<v-card>
-				<v-card-title class="text-subtitle-1">{{ header?.title || field?.code }}</v-card-title>
+				<v-card-title class="text-subtitle-1">{{field?.caption|| header?.title }}</v-card-title>
 				<v-card-text>
 					<v-progress-linear v-if="encrypt_dialog_loading" indeterminate color="primary" class="mb-2"></v-progress-linear>
 					<div v-else class="encrypt-full-value">{{ encrypt_dialog_decrypted_value ?? '—' }}</div>

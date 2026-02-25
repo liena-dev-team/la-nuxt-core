@@ -28,10 +28,6 @@
 						prepend-icon="mdi-trash-can" size="small" color="red" variant="elevated">
 						<span>Delete {{ selected_records.length }} Selected</span>
 					</v-btn>
-					<v-btn v-if="page_run_now && selected_records.length > 0" @click="runNowSelected" prepend-icon="mdi-play"
-						size="small" color="green" variant="elevated">
-						<span>Run Now {{ selected_records.length }} Selected</span>
-					</v-btn>
 					<v-btn v-if="page_exportable" color="primary" size="small" variant="elevated" @click="exportFile">
 						<span>Export file</span>
 					</v-btn>
@@ -84,8 +80,7 @@
 								<page-list-record v-for="(record, index) in records" :key="record[primary_field?.code]"
 									:record="record" :headers="headers" :show_selectbox="show_selectbox"
 									:form_mode="form_mode" :view_path="page_path + VIEW_PATH"
-									:insertable="page_insertable"
-									:editable="page_editable" :deletable="page_deletable"
+									:insertable="page_insertable" :editable="page_editable" :deletable="page_deletable"
 									@menu-item-selected="onSelectRowSubMenuItem" :has_card_page="has_card_page"
 									@record-selected="onRecordSelected" @click="onClickRecord(record)"
 									@field:change="onChangeField" @field:blur="onBlurField">
@@ -277,8 +272,7 @@ const saved_expressions = reactive({});
 const emit = defineEmits([
 	"loaded",
 	"record:delete", "records:delete", "records:change",
-	"update:selected_records", "update:before",
-	"run-now"
+	"update:selected_records", "update:before"
 ]);
 
 // Expose
@@ -428,16 +422,6 @@ function showSelectBox(val) {
 		});
 
 		emit("update:selected_records", selected_records.value);
-	}
-}
-
-function runNowSelected() {
-	if (selected_records.value.length <= 0) {
-		return;
-	}
-
-	for (const record of selected_records.value) {
-		emit('run-now', record)
 	}
 }
 

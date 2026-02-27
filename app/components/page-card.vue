@@ -281,21 +281,18 @@
 																</div>
 																<div :class="field.input_type"
 																	v-if="field.input_type == FIELD_INPUT_TYPE.ENCRYPTED_PHONE">
-																	<v-text-field
-																		:model-value="getEncryptedPhoneDisplayValue(field)"
-																		@update:model-value="onEncryptedPhoneInput(field, $event)"
-																		density="compact" autocomplete="off"
+																	<field-encrypt-phone
+																		:key="'encrypt-phone-' + field.code + '-' + record_refresh_key"
+																		:field="field"
+																		:model_value="record[field.code]"
+																		@update:model_value="(val) => { record[field.code] = val; onValueChange(field); }"
 																		:variant="calculateFieldVariant(field)"
-																		:hide-details="(form_mode == FORM_MODE.VIEW) || !!!field_errors[field.code]"
+																		:hide_details="(form_mode == FORM_MODE.VIEW) || !!!field_errors[field.code]"
 																		:disabled="!field.editable"
-																		:readonly="!getEncryptedPhoneState(field.code)?.show"
-																		@blur="saveFieldValue(field)"
 																		:error="!!field_errors[field.code]"
-																		:error-messages="field_errors[field.code]"
-																		:type="getEncryptedPhoneState(field.code)?.show ? 'text' : 'password'"
-																		:append-icon="getEncryptedPhoneState(field.code)?.show ? 'mdi-eye' : 'mdi-eye-off'"
-																		@click:append="toggleEncryptedPhoneShow(field)">
-																	</v-text-field>
+																		:error_messages="field_errors[field.code]"
+																		@blur="saveFieldValue(field)">
+																	</field-encrypt-phone>
 																</div>
 																<div :class="field.input_type"
 																	v-if="field.input_type == FIELD_INPUT_TYPE.LOOKUP && field.field_lookup">
@@ -482,9 +479,7 @@ const primary_field = ref();
 const field_errors = ref({});
 const all_fields = ref({});
 const expansion_mode = ref(0);
-
-/**  { show, decrypted_value, loading } */
-const encrypted_phone_state = ref({});
+const record_refresh_key = ref(0);
 
 const rules = {
 	required: value => !!value || 'Required.',
@@ -502,56 +497,6 @@ function calculateFieldVariant(field) {
 			return "outlined";
 		default:
 			return "plain";
-	}
-}
-
-function getEncryptedPhoneState(field_code) {
-	if (!encrypted_phone_state.value[field_code]) {
-		encrypted_phone_state.value[field_code] = { show: false, decrypted_value: null, loading: false };
-	}
-	return encrypted_phone_state.value[field_code];
-}
-
-function getEncryptedPhoneDisplayValue(field) {
-	const state = getEncryptedPhoneState(field.code);
-	if (state.show && state.decrypted_value != null) {
-		return state.decrypted_value;
-	}
-	return record.value[field.code] ?? '';
-}
-
-function onEncryptedPhoneInput(field, value) {
-	const state = getEncryptedPhoneState(field.code);
-	if (state.show) {
-		record.value[field.code] = value;
-	}
-}
-
-async function toggleEncryptedPhoneShow(field) {
-	const state = getEncryptedPhoneState(field.code);
-	if (state.loading) return;
-	if (state.show) {
-		state.show = false;
-		state.decrypted_value = null;
-		return;
-	}
-	const raw_value = record.value[field.code];
-	if (raw_value === undefined || raw_value === null || raw_value === '') {
-		state.decrypted_value = '—';
-		state.show = true;
-		return;
-	}
-	state.loading = true;
-	try {
-		const res = await $admin_page.decrypt(raw_value);
-		const decoded = res?.value ?? res?.data ?? res;
-		state.decrypted_value = decoded != null ? String(decoded) : '—';
-		state.show = true;
-	} catch (e) {
-		state.decrypted_value = 'Lỗi giải mã';
-		state.show = true;
-	} finally {
-		state.loading = false;
 	}
 }
 
@@ -586,7 +531,7 @@ function setRecord(new_value) {
 			...record.value,
 		};
 
-		encrypted_phone_state.value = {};
+		record_refresh_key.value++;
 		emit("update:record", record.value);
 		emit("record:changed", new_value, old_value);
 	}

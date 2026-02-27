@@ -102,6 +102,7 @@ const field_dropdown_menu = ref({
 const fields_sticky = ref({});
 const fields_not_sticky = ref({});
 const primary_field = ref();
+const record_sync_version = ref(0);
 
 // Functions
 function onMenuItemSelected(data) {
@@ -146,30 +147,19 @@ function onBlurField(field) {
 	emit("field:blur", field, record);
 }
 
-onMounted(async () => {
+function buildFieldsFromRecord(rec) {
 	try {
 		fields_sticky.value = {};
 		fields_not_sticky.value = {};
 		Object.entries(headers).forEach(([header_key, header]) => {
-			if (header.is_checkbox) {
-				return;
-			}
+			if (header.is_checkbox) return;
+			if (header_key == PAGE_LIST_HEADER_TYPE.DROPDOWN_MENU || header_key == PAGE_LIST_HEADER_TYPE.SELECT_BOX) return;
 
-			if (header_key == PAGE_LIST_HEADER_TYPE.DROPDOWN_MENU ||
-				header_key == PAGE_LIST_HEADER_TYPE.SELECT_BOX
-			) {
-				return;
-			}
+			const value = rec[header_key];
+			const field_data = { ...header.field };
+			field_data.value = value;
+			field_data.record_sync_version = record_sync_version.value;
 
-			const value = record[header_key];
-
-			const field_data = {
-				...header.field
-			}; // Copy field info from header to field_data
-
-			field_data.value = value; // Assign record data to field data
-
-			// Assign fields to primary field
 			if (field_data.is_primary) {
 				field_data.view_url = calcUrl(header_key, value, FORM_MODE.VIEW);
 				field_data.edit_url = calcUrl(header_key, value, FORM_MODE.EDIT);
@@ -179,7 +169,6 @@ onMounted(async () => {
 			if (header?.is_sticky) {
 				fields_sticky.value[header_key] = field_data;
 			} else {
-				// Add field slot
 				field_data.slot = SLOT_KEY_FIELD + field_data.code;
 				fields_not_sticky.value[header_key] = field_data;
 			}
@@ -187,7 +176,31 @@ onMounted(async () => {
 	} catch (error) {
 		console.log(error);
 	}
+}
+
+function syncFieldsFromRecord(rec) {
+	record_sync_version.value++;
+	Object.entries(headers).forEach(([header_key, header]) => {
+		if (header.is_checkbox || header_key == PAGE_LIST_HEADER_TYPE.DROPDOWN_MENU || header_key == PAGE_LIST_HEADER_TYPE.SELECT_BOX) return;
+		const field_data = header?.is_sticky ? fields_sticky.value[header_key] : fields_not_sticky.value[header_key];
+		if (field_data) {
+			field_data.value = rec[header_key];
+			field_data.record_sync_version = record_sync_version.value;
+			if (field_data.is_primary) {
+				field_data.view_url = calcUrl(header_key, field_data.value, FORM_MODE.VIEW);
+				field_data.edit_url = calcUrl(header_key, field_data.value, FORM_MODE.EDIT);
+			}
+		}
+	});
+}
+
+onMounted(() => {
+	buildFieldsFromRecord(record);
 });
+
+watch(() => record, (new_record) => {
+	syncFieldsFromRecord(new_record);
+}, { deep: true });
 
 </script>
 

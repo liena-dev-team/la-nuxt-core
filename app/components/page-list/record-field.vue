@@ -63,11 +63,15 @@
 									</template>
 								</div>
 							</div>
-							<!-- Encrypted: hiển thị *****, click mở dialog xem đầy đủ -->
-							<div :class="field.input_type" v-if="field.input_type == FIELD_INPUT_TYPE.ENCRYPTED"
-								class="encrypt-masked" @click.stop="open_encrypt_dialog">
-								{{ encrypt_masked_display }}
-							</div>
+							<!-- Encrypted / EncryptedPhone-->
+							<field-encrypt-phone
+								:key="'encrypt-phone-view-' + field.code + '-' + (field.record_sync_version ?? 0)"
+								v-if="field.input_type == FIELD_INPUT_TYPE.ENCRYPTED || field.input_type == FIELD_INPUT_TYPE.ENCRYPTED_PHONE"
+								:field="field"
+								:model_value="field?.value"
+								mode="view"
+								:caption="field?.caption || header?.title">
+							</field-encrypt-phone>
 						</template>
 					</div>
 					<!-- Edit Mode -->
@@ -125,6 +129,20 @@
 								@update:model-value="on_change_field" @blur="on_blur_field">
 							</v-autocomplete>
 						</div>
+						<div :class="field.input_type"
+							v-if="field.input_type == FIELD_INPUT_TYPE.ENCRYPTED_PHONE">
+							<!-- EncryptedPhone: auto-decrypt and display plain text directly (no eye) -->
+							<field-encrypt-phone
+								:field="field"
+								:model_value="field?.value"
+								mode="edit_plain"
+								@update:model_value="(val) => { field.value = val; on_change_field(); }"
+								variant="outlined"
+								hide_details="auto"
+								:disabled="!field.editable"
+								@blur="on_blur_field">
+							</field-encrypt-phone>
+						</div>
 					</div>
 				</template>
 			</div>
@@ -146,28 +164,10 @@
 		<!-- Check Box -->
 		<input v-else class="field-checkbox" type="checkbox" v-model="is_selected" @change="on_selected" />
 
-		<!-- Dialog xem giá trị encrypted (gọi API decrypt khi mở, đóng dialog giữ nguyên field.value) -->
-		<v-dialog v-model="encrypt_dialog_open" max-width="480" persistent
-			@click:outside="close_encrypt_dialog" @update:model-value="on_encrypt_dialog_model_change">
-			<v-card>
-				<v-card-title class="text-subtitle-1">{{field?.caption|| header?.title }}</v-card-title>
-				<v-card-text>
-					<v-progress-linear v-if="encrypt_dialog_loading" indeterminate color="primary" class="mb-2"></v-progress-linear>
-					<div v-else class="encrypt-full-value">{{ encrypt_dialog_decrypted_value ?? '—' }}</div>
-				</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn color="primary" variant="tonal" @click="close_encrypt_dialog">Đóng</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
 	</td>
 </template>
 
 <script setup>
-// Plugins
-const { $admin_page } = useNuxtApp();
-
 // Model
 const is_selected = defineModel('is_selected', { default: false });
 
@@ -225,19 +225,8 @@ const header_style = computed(() => {
 })
 const media_option_images = computed(() => get_multi_select_image(field));
 
-// Encrypted: hiển thị ***** nếu có value, rỗng thì không hiển thị gì
-const encrypt_masked_display = computed(() => {
-	if (field?.input_type !== FIELD_INPUT_TYPE.ENCRYPTED) return '';
-	const v = field?.value;
-	if (v === undefined || v === null || v === '') return '—';
-	return '*****';
-});
-
 // Refs
 const items = ref({});
-const encrypt_dialog_open = ref(false);
-const encrypt_dialog_loading = ref(false);
-const encrypt_dialog_decrypted_value = ref(null);
 
 // Functions
 function on_menu_item_selected(e) {
@@ -249,38 +238,6 @@ function on_menu_item_selected(e) {
 }
 
 function on_selected(e) {
-}
-
-async function open_encrypt_dialog() {
-	if (field?.input_type !== FIELD_INPUT_TYPE.ENCRYPTED) return;
-	const raw_value = field?.value;
-	if (raw_value === undefined || raw_value === null || raw_value === '') {
-		encrypt_dialog_decrypted_value.value = '—';
-		encrypt_dialog_open.value = true;
-		return;
-	}
-	encrypt_dialog_decrypted_value.value = null;
-	encrypt_dialog_loading.value = true;
-	encrypt_dialog_open.value = true;
-	try {
-		const res = await $admin_page.decrypt(raw_value);
-		const decoded = res?.value ?? res?.data ?? res;
-		encrypt_dialog_decrypted_value.value = decoded != null ? String(decoded) : '—';
-	} catch (e) {
-		encrypt_dialog_decrypted_value.value = 'Lỗi giải mã';
-	} finally {
-		encrypt_dialog_loading.value = false;
-	}
-}
-
-function close_encrypt_dialog() {
-	encrypt_dialog_open.value = false;
-	encrypt_dialog_decrypted_value.value = null;
-	// field.value không đổi, vẫn là giá trị encrypted cũ
-}
-
-function on_encrypt_dialog_model_change(is_open) {
-	if (!is_open) close_encrypt_dialog();
 }
 
 function on_show_sub_menu() {
@@ -416,15 +373,6 @@ td.record-field {
 			}
 		}
 
-		.encrypt-masked {
-			cursor: pointer;
-			user-select: none;
-			color: var(--v-theme-primary);
-			&:hover {
-				text-decoration: underline;
-			}
-		}
-
 		.image-thumbnails {
 			display: flex;
 			flex-wrap: wrap;
@@ -463,11 +411,5 @@ td.record-field {
 	height: 20px;
 	cursor: pointer;
 	margin: 10px;
-}
-
-.encrypt-full-value {
-	word-break: break-all;
-	padding: 8px 0;
-	font-family: monospace;
 }
 </style>

@@ -49,6 +49,7 @@ export const FIELD_INPUT_TYPE = {
 	MEDIA_FILE: "media_file",
 	UPLOAD_FILE: "upload_file",
 	ENCRYPTED: "encrypted",
+	ENCRYPTED_PHONE: "encrypted_phone",
 	RATING_STAR: "rating_star",
 	LOOKUP: "lookup",
 	TAG: "tag"
@@ -71,6 +72,7 @@ export const FIELD_INPUT_TYPE_LABEL = {
 	JSON: "Json",
 	UPLOAD_FILE: "Upload File",
 	ENCRYPTED: "Encrypted",
+	ENCRYPTED_PHONE: "Encrypted Phone",
 	RATING_STAR: "Rating Star",
 	LOOKUP: "Lookup"
 };
@@ -105,6 +107,8 @@ export function getInputTypeLabel(type) {
 			return FIELD_INPUT_TYPE_LABEL.UPLOAD_FILE;
 		case FIELD_INPUT_TYPE.ENCRYPTED:
 			return FIELD_INPUT_TYPE_LABEL.ENCRYPTED;
+		case FIELD_INPUT_TYPE.ENCRYPTED_PHONE:
+			return FIELD_INPUT_TYPE_LABEL.ENCRYPTED_PHONE;
 		case FIELD_INPUT_TYPE.LOOKUP:
 			return FIELD_INPUT_TYPE_LABEL.LOOKUP;
 		case FIELD_INPUT_TYPE.RATING_STAR:

@@ -298,7 +298,6 @@ function onSelectRowSubMenuItem(data) {
 				id: data.record[primary_field_code],
 				data: data.record,
 			};
-
 			break;
 		case PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.SELECT_MORE: // Show More
 			selected_records.value.push(data.record);
@@ -481,7 +480,7 @@ async function onDoFilter(reset_page = false) {
 					new_filter.expression = `${startStr}${STRING_VALUES_SEPERATOR}${endStr}`;
 				} else if (filter.expression) {
 					new_filter.expression = "";
-				} 
+				}
 				break;
 			case FIELD_INPUT_TYPE.DATE_TIME:
 				if (Array.isArray(filter.expression) && filter.expression.length === 2) {
@@ -635,7 +634,6 @@ async function requestFilter(new_filter_request) {
 	if (!new_filter_request) {
 		return;
 	}
-	
 	if (typeof new_filter_request.toArray !== "function") {
 		new_filter_request = new FilterRequest(
 			new_filter_request.pagination,
@@ -803,7 +801,6 @@ async function requestUpdate(record) {
 		method: HTTP_METHOD.PUT,
 		body: record
 	});
-
 	if (!response_data.result) {
 		// TODO: Process false result
 	}
@@ -854,7 +851,7 @@ function initRecords() {
 
 	Object.entries(sessionData).forEach(([page, filterObj]) => {
 		if (!filterObj || Object.keys(filterObj).length === 0) {
-		delete sessionData[page];
+			delete sessionData[page];
 		}
 	});
 	sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
@@ -1021,31 +1018,31 @@ async function init() {
 }
 
 watch(added_filters, (val) => {
-  const sessionKey = SESSION_STORAGE_KEY;
-  const currentPage = window.location.pathname;
-  const sessionData = JSON.parse(sessionStorage.getItem(sessionKey) || "{}");
+	const sessionKey = SESSION_STORAGE_KEY;
+	const currentPage = window.location.pathname;
+	const sessionData = JSON.parse(sessionStorage.getItem(sessionKey) || "{}");
 
-  sessionData[currentPage] = {};
+	sessionData[currentPage] = {};
 
-  Object.entries(val).forEach(([field_code, filter]) => {
-    let expr = filter.expression;
+	Object.entries(val).forEach(([field_code, filter]) => {
+		let expr = filter.expression;
 
-    if (filter.field.input_type === FIELD_INPUT_TYPE.DATE) {
-      if (Array.isArray(expr)) {
-        expr = `${formatMySQLDate(expr[0])}|${formatMySQLDate(expr[1])}`;
-      }
-    }
+		if (filter.field.input_type === FIELD_INPUT_TYPE.DATE) {
+			if (Array.isArray(expr)) {
+				expr = `${formatMySQLDate(expr[0])}|${formatMySQLDate(expr[1])}`;
+			}
+		}
 
-    if (filter.field.input_type === FIELD_INPUT_TYPE.DATE_TIME) {
-      if (Array.isArray(expr)) {
-        expr = `${formatMySQLDateTime(expr[0])}|${formatMySQLDateTime(expr[1])}`;
-      }
-    }
+		if (filter.field.input_type === FIELD_INPUT_TYPE.DATE_TIME) {
+			if (Array.isArray(expr)) {
+				expr = `${formatMySQLDateTime(expr[0])}|${formatMySQLDateTime(expr[1])}`;
+			}
+		}
 
-    sessionData[currentPage][field_code] = expr;
-  });
+		sessionData[currentPage][field_code] = expr;
+	});
 
-  sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
+	sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
 }, { deep: true });
 
 onMounted(init);

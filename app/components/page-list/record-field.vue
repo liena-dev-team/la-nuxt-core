@@ -213,7 +213,7 @@ const {
 	has_card_page: {
 		type: Boolean,
 		default: true
-	}
+	},
 });
 
 // Computed

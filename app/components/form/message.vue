@@ -1,13 +1,12 @@
 <template>
 	<div class="la-form-message" v-if="show_messages && messages && messages.length > 0">
 		<!-- Success -->
-		<ol class="messages success" v-for="(msg, key) in success_msgs" :key="key">
-			<li class="item">
-				<span class="icon"><i class="fa-solid fa-circle-check"></i></span>
+		<v-alert v-for="(msg, key) in success_msgs" :key="key" class="messages success" density="compact"
+			color="success" icon="mdi-check-circle">
+			<div class="item d-flex align-center">
 				<span class="msg">{{ msg.msg }}</span>
-				<div style="margin-left: auto;"></div>
-			</li>
-		</ol>
+			</div>
+		</v-alert>
 		<!-- Errors -->
 		<v-alert class="messages error" v-for="(msgs, key) in field_errors" :key="key" density="compact" color="error"
 			icon="mdi-alert-circle">

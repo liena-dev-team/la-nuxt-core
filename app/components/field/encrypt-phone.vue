@@ -56,8 +56,6 @@
 </template>
 
 <script setup>
-const { $admin_page } = useNuxtApp();
-
 const { field, model_value, mode, caption, variant, hide_details, disabled, error, error_messages } = defineProps({
 	field: { type: Object, required: true },
 	model_value: { type: String, default: '' },
@@ -108,7 +106,10 @@ const dialog_caption = computed(() => caption || field?.caption || '');
 async function fetchDecrypted(raw_value) {
 	if (raw_value === undefined || raw_value === null || raw_value === '') return '—';
 	try {
-		const res = await $admin_page.decrypt(raw_value);
+		const res = await useApiFetch('/admin/customer/user/decrypt', {
+			method: HTTP_METHOD.POST,
+			body: { value: raw_value }
+		});
 		const decoded = res?.value ?? res?.data ?? res;
 		if (decoded == null) return '—';
 		if (typeof decoded === 'string') return decoded;
@@ -188,7 +189,10 @@ async function fetchEditPlainDecrypted() {
 	}
 	edit_plain_loading.value = true;
 	try {
-		const res = await $admin_page.decrypt(raw);
+		const res = await useApiFetch('/admin/customer/user/decrypt', {
+			method: HTTP_METHOD.POST,
+			body: { value: raw }
+		});
 		const decoded = res?.value ?? res?.data ?? res;
 		if (decoded != null && typeof decoded === 'string') {
 			edit_plain_display_value.value = decoded;

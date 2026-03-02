@@ -134,12 +134,12 @@
 							<!-- EncryptedPhone: auto-decrypt and display plain text directly (no eye) -->
 							<field-encrypt-phone
 								:field="field"
-								:model_value="field?.value"
+								v-model:model_value="field.value"
 								mode="edit_plain"
-								@update:model_value="(val) => { field.value = val; on_change_field(); }"
 								variant="outlined"
 								hide_details="auto"
 								:disabled="!field.editable"
+								@update:model_value="on_change_field"
 								@blur="on_blur_field">
 							</field-encrypt-phone>
 						</div>

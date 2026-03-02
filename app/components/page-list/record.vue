@@ -146,19 +146,16 @@ function onChangeField(field) {
 function onBlurField(field) {
 	emit("field:blur", field, record);
 }
-
-function buildFieldsFromRecord(rec) {
-	try {
-		fields_sticky.value = {};
+onMounted(() => {
+	fields_sticky.value = {};
 		fields_not_sticky.value = {};
 		Object.entries(headers).forEach(([header_key, header]) => {
 			if (header.is_checkbox) return;
 			if (header_key == PAGE_LIST_HEADER_TYPE.DROPDOWN_MENU || header_key == PAGE_LIST_HEADER_TYPE.SELECT_BOX) return;
 
-			const value = rec[header_key];
+			const value = record[header_key];
 			const field_data = { ...header.field };
 			field_data.value = value;
-			field_data.record_sync_version = record_sync_version.value;
 
 			if (field_data.is_primary) {
 				field_data.view_url = calcUrl(header_key, value, FORM_MODE.VIEW);
@@ -173,30 +170,19 @@ function buildFieldsFromRecord(rec) {
 				fields_not_sticky.value[header_key] = field_data;
 			}
 		});
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-function syncFieldsFromRecord(rec) {
-	record_sync_version.value++;
+});
+// Sync field view objects when the underlying record data changes (e.g. after API read/filter).
+function syncFieldsFromRecord(record) {
 	Object.entries(headers).forEach(([header_key, header]) => {
 		if (header.is_checkbox || header_key == PAGE_LIST_HEADER_TYPE.DROPDOWN_MENU || header_key == PAGE_LIST_HEADER_TYPE.SELECT_BOX) return;
 		const field_data = header?.is_sticky ? fields_sticky.value[header_key] : fields_not_sticky.value[header_key];
 		if (field_data) {
-			field_data.value = rec[header_key];
-			field_data.record_sync_version = record_sync_version.value;
-			if (field_data.is_primary) {
-				field_data.view_url = calcUrl(header_key, field_data.value, FORM_MODE.VIEW);
-				field_data.edit_url = calcUrl(header_key, field_data.value, FORM_MODE.EDIT);
-			}
+			field_data.value = record[header_key];
 		}
 	});
 }
 
-onMounted(() => {
-	buildFieldsFromRecord(record);
-});
+
 
 watch(() => record, (new_record) => {
 	syncFieldsFromRecord(new_record);

@@ -123,9 +123,10 @@
 							</v-autocomplete>
 						</div>
 						<div :class="field.input_type" v-if="field.input_type == FIELD_INPUT_TYPE.MULTI_SELECT">
-							<!-- Multi Select -->
-							<v-autocomplete v-model="field.value" multiple :items="Object.values(field.options)"
-								density="compact" variant="outlined" hide-details="auto" :disabled="!field.editable"
+							<!-- Multi Select -"31,44,2" -->
+							<v-autocomplete v-model="multi_select_model" multiple :items="Object.values(field.options)"
+								item-value="value" item-title="title" density="compact" variant="outlined" hide-details="auto"
+								:disabled="!field.editable"
 								@update:model-value="on_change_field" @blur="on_blur_field">
 							</v-autocomplete>
 						</div>
@@ -216,7 +217,29 @@ const {
 	},
 });
 
-// Computed
+// Helpers
+function splitCommaOrPipe(val) {
+	return String(val).split(',').flatMap(s => s.split('|')).map(s => s.trim()).filter(Boolean);
+}
+
+
+const multi_select_model = computed({
+	get() {
+		if (field?.input_type !== FIELD_INPUT_TYPE.MULTI_SELECT) return [];
+		const raw = field.value;
+		if (!raw) return [];
+		const arr = Array.isArray(raw) ? raw : splitCommaOrPipe(raw);
+		return arr.flatMap(v => splitCommaOrPipe(v));
+	},
+	set(val) {
+		if (field?.input_type !== FIELD_INPUT_TYPE.MULTI_SELECT) return;
+		const arr = Array.isArray(val) ? val : [];
+		const rawValues = arr.map(v => (typeof v === 'object' && v?.value != null) ? v.value : String(v));
+		const values = rawValues.flatMap(v => splitCommaOrPipe(v));
+		field.value = values.join(MULTI_SELECT_VALUES_SEPARATOR);
+	}
+});
+
 const header_style = computed(() => {
 	return {
 		'width': header?.width ? (header.width + 'px') : '0',
@@ -266,17 +289,13 @@ function on_blur_field() {
 }
 
 function get_multi_select_value(field) {
-	let values = field.value || "";
-
+	const raw = field.value || "";
 	try {
-		values = values.split(STRING_VALUES_SEPERATOR).map((val) => {
-			return field.options?.[val]?.title || "";
-		}).join(", ");
+		const arr = Array.isArray(raw) ? raw : splitCommaOrPipe(raw);
+		return arr.map((val) => field.options?.[val]?.title || "").join(", ");
 	} catch {
-		values = "";
+		return "";
 	}
-
-	return values;
 }
 
 function get_multi_select_image(field) {

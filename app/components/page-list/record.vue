@@ -177,7 +177,13 @@ function syncFieldsFromRecord(record) {
 		if (header.is_checkbox || header_key == PAGE_LIST_HEADER_TYPE.DROPDOWN_MENU || header_key == PAGE_LIST_HEADER_TYPE.SELECT_BOX) return;
 		const field_data = header?.is_sticky ? fields_sticky.value[header_key] : fields_not_sticky.value[header_key];
 		if (field_data) {
-			field_data.value = record[header_key];
+			const raw = record[header_key];
+			if (field_data.input_type === FIELD_INPUT_TYPE.MULTI_SELECT && raw) {
+				const arr = Array.isArray(raw) ? raw : String(raw).split(',').flatMap(s => s.split('|')).map(s => s.trim()).filter(Boolean);
+				field_data.value = arr.join(MULTI_SELECT_VALUES_SEPARATOR);
+			} else {
+				field_data.value = raw;
+			}
 		}
 	});
 }

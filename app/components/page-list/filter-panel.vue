@@ -23,7 +23,7 @@
 							</div>
 							<div class="row-bottom">
 								<div :class="filter.field.input_type"
-									v-if="[FIELD_INPUT_TYPE.INT, FIELD_INPUT_TYPE.DECIMAL, FIELD_INPUT_TYPE.STRING].includes(filter.field.input_type)">
+									v-if="[FIELD_INPUT_TYPE.INT, FIELD_INPUT_TYPE.DECIMAL, FIELD_INPUT_TYPE.STRING, FIELD_INPUT_TYPE.ENCRYPTED_PHONE].includes(filter.field.input_type)">
 									<!-- String/Int/Decimal-->
 									<v-text-field density="compact" variant="outlined" hide-details="auto"
 										v-model="filter.expression" @keydown.enter="doFilter"></v-text-field>

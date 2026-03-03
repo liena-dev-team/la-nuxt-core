@@ -199,3 +199,4 @@ export const CARD_SECTION_POSITION = {
 };
 
 export const STRING_VALUES_SEPERATOR = "|";
+export const MULTI_SELECT_VALUES_SEPARATOR = ",";

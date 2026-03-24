@@ -64,14 +64,14 @@
 								</div>
 							</div>
 							<!-- Encrypted / EncryptedPhone-->
-							<field-encrypt-phone
+							<field-encrypt
 								:key="'encrypt-phone-view-' + field.code + '-' + (field.record_sync_version ?? 0)"
 								v-if="field.input_type == FIELD_INPUT_TYPE.ENCRYPTED || field.input_type == FIELD_INPUT_TYPE.ENCRYPTED_PHONE"
 								:field="field"
 								:model_value="field?.value"
 								mode="view"
 								:caption="field?.caption || header?.title">
-							</field-encrypt-phone>
+							</field-encrypt>
 						</template>
 					</div>
 					<!-- Edit Mode -->
@@ -133,7 +133,7 @@
 						<div :class="field.input_type"
 							v-if="field.input_type == FIELD_INPUT_TYPE.ENCRYPTED_PHONE">
 							<!-- EncryptedPhone: auto-decrypt and display plain text directly (no eye) -->
-							<field-encrypt-phone
+							<field-encrypt
 								:field="field"
 								v-model:model_value="field.value"
 								mode="edit_plain"
@@ -142,7 +142,7 @@
 								:disabled="!field.editable"
 								@update:model_value="on_change_field"
 								@blur="on_blur_field">
-							</field-encrypt-phone>
+							</field-encrypt>
 						</div>
 					</div>
 				</template>

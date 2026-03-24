@@ -281,8 +281,8 @@
 																</div>
 																<div :class="field.input_type"
 																	v-if="field.input_type == FIELD_INPUT_TYPE.ENCRYPTED_PHONE">
-																	<field-encrypt-phone
-																		:key="'encrypt-phone-' + field.code + '-' + record_refresh_key"
+																	<field-encrypt
+																		:key="'encrypt-' + field.code + '-' + record_refresh_key"
 																		:field="field"
 																		:model_value="record[field.code]"
 																		@update:model_value="(val) => { record[field.code] = val; onValueChange(field); }"
@@ -292,7 +292,7 @@
 																		:error="!!field_errors[field.code]"
 																		:error_messages="field_errors[field.code]"
 																		@blur="saveFieldValue(field)">
-																	</field-encrypt-phone>
+																	</field-encrypt>
 																</div>
 																<div :class="field.input_type"
 																	v-if="field.input_type == FIELD_INPUT_TYPE.LOOKUP && field.field_lookup">

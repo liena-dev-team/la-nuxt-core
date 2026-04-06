@@ -83,7 +83,7 @@ const dialog_decrypted_value = ref(null);
 const edit_plain_display_value = ref('');
 const edit_plain_loading = ref(false);
 
-/** Biến độc lập cho hiển thị trong mode edit_plain (giá trị đã giải mã), tách khỏi model_value (có thể đang mã hóa). */
+/** Local display value for edit_plain mode (decrypted/plain), separate from model_value (may still be encrypted). */
 const edit_plain_display = computed(() => edit_plain_display_value.value);
 
 const raw_value_for_view = computed(() => model_value ?? field?.value ?? '');
@@ -122,6 +122,9 @@ async function fetchDecrypted(raw_value) {
 
 function onInput(value) {
 	if (state.show) {
+		// Keep in sync with model_value after emit; otherwise watch(model_value) sees a mismatch
+		// with state.decrypted_value and clears show → only one keystroke then the field locks.
+		state.decrypted_value = value;
 		emit('update:model_value', value);
 	}
 }
@@ -171,8 +174,8 @@ watch(() => model_value, (new_val) => {
 	}
 });
 
-// Plain phone pattern: đã giải mã hoặc user nhập (chỉ số, khoảng trắng, +-).
-// Tránh gọi decrypt lần nữa khi click qua lại record mà field.value đang là plain.
+// Plain phone pattern: already decrypted or user-typed (digits, spaces, + -).
+// Avoid calling decrypt again when switching records while field.value is already plain.
 const PLAIN_PHONE_PATTERN = /^[\d\s+\-()]{8,20}$/;
 
 // Mode edit_plain: fetch decrypted value when model_value changes.
@@ -182,7 +185,7 @@ async function fetchEditPlainDecrypted() {
 		edit_plain_display_value.value = '';
 		return;
 	}
-	// Đã là plain (từ record khác hoặc user nhập) → không gọi decrypt.
+	// Already plain (from another record or user input) → skip decrypt.
 	if (PLAIN_PHONE_PATTERN.test(raw)) {
 		edit_plain_display_value.value = raw;
 		return;

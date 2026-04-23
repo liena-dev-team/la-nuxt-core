@@ -46,6 +46,7 @@ export const FIELD_INPUT_TYPE = {
 	RICH_EDITOR: "rich_editor",
 	CODE_EDITOR: "code_editor",
 	JSON: "json",
+	BUTTON: "button",
 	MEDIA_FILE: "media_file",
 	UPLOAD_FILE: "upload_file",
 	ENCRYPTED: "encrypted",

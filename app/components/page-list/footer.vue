@@ -5,7 +5,7 @@
 				@update:model-value="onPaginationChange" density="comfortable"></v-pagination>
 			<v-spacer></v-spacer>
 			<v-select class="page-sizes" v-model="pagination.size" :items="[50, 100, 200]" variant="outlined" hide-details="auto"
-				@update:model-value="onPaginationChange" density="compact"></v-select>
+				@update:model-value="onPageSizeChange" density="compact"></v-select>
 		</div>
 		<div class="selected_records" v-if="show_selected_records && selected_records.length > 0">
 			<div class="record" v-for="(record, index) in selected_records">
@@ -42,6 +42,12 @@ const { show_selected_records, selected_record_label } = defineProps({
 
 // Functions
 function onPaginationChange() {
+	emit("update:pagination", pagination.value);
+}
+
+function onPageSizeChange() {
+	// Reset to first page to avoid invalid page index after changing page size.
+	pagination.value.page = 1;
 	emit("update:pagination", pagination.value);
 }
 

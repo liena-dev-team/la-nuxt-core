@@ -1,14 +1,12 @@
 <template>
 	<div class="la-rating-star">
-		<v-rating v-model="internalValue" :length="max" :readonly="mode === 'view'" color="yellow"
-			background-color="grey lighten-1" density="compact" @update:model-value="onUpdate" />
+		<v-rating v-model="ratingValue" :length="max" :readonly="mode === 'view'" active-color="yellow"
+			color="grey-lighten-1" density="compact" />
 	</div>
 </template>
 
 <script setup>
-const emit = defineEmits(['update:modelValue'])
-
-const { mode, max, modelValue, field } = defineProps({
+const { mode, max, field } = defineProps({
 	mode: {
 		type: String,
 		default: "view"
@@ -17,38 +15,34 @@ const { mode, max, modelValue, field } = defineProps({
 		type: Number,
 		default: 5
 	},
-	modelValue: {
-		type: Object,
-		default: () => ({})
-	},
 	field: {
 		type: Object,
 		default: () => ({})
 	}
 })
 
-const internalValue = ref(
-	modelValue[field.code] != null && modelValue[field.code] !== ''
-		? Number(modelValue[field.code])
-		: Number(field.value) || 0
-);
+const modelValue = defineModel({
+	type: [Number, String],
+	default: 0
+})
 
-watch(
-	() => [modelValue[field.code], field.value],
-	([newModelValue, newFieldValue]) => {
-		if (newModelValue != null && newModelValue !== '') {
-			internalValue.value = Number(newModelValue);
-		} else {
-			internalValue.value = Number(newFieldValue) || 0;
+const ratingValue = computed({
+	get() {
+		const raw = modelValue.value
+		if (raw != null && raw !== '') {
+			const num = Number(raw)
+			if (Number.isFinite(num)) return num
 		}
-	}
-);
 
-function onUpdate(val) {
-	emit('update:model-value', { ...modelValue, [field.code]: val });
-	const el = document.activeElement;
-	if (el) el.blur();
-}
+		const fallback = Number(field?.value)
+		return Number.isFinite(fallback) ? fallback : 0
+	},
+	set(val) {
+		modelValue.value = val
+		const el = document.activeElement
+		if (el) el.blur()
+	}
+})
 </script>
 
 <style lang="less">

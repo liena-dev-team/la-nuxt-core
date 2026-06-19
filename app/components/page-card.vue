@@ -305,13 +305,11 @@
 																<div :class="field.input_type"
 																	v-if="field.input_type == FIELD_INPUT_TYPE.RATING_STAR">
 																	<!-- Rating Star -->
-																	<field-rating-star :modelValue="record"
+																	<field-rating-star v-model="record[field.code]"
 																		:field="field"
 																		:mode="(form_mode == FORM_MODE.VIEW || !field.editable) ? 'view' : 'rating'"
-																		:max="field.max || 5" @update:model-value="val => {
-																			record[field.code] = val[field.code];
-																			saveFieldValue(field);
-																		}" />
+																		:max="field.max || 5"
+																		@update:model-value="saveFieldValue(field)" />
 																</div>
 																<div :class="field.input_type"
 																	v-if="field.input_type == FIELD_INPUT_TYPE.TAG">
@@ -582,6 +580,10 @@ function setRecord(new_value) {
 					break;
 				case FIELD_INPUT_TYPE.LOOKUP:
 					record.value[field.code] = record.value[field.code] || [];
+					break;
+				case FIELD_INPUT_TYPE.RATING_STAR:
+					record.value[field.code] = record.value[field.code] != null ? record.value[field.code] : field.default;
+					record.value[field.code] = isNaN(record.value[field.code]) ? 0 : parseInt(record.value[field.code], 10);
 					break;
 			}
 

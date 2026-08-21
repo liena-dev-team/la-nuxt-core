@@ -8,8 +8,8 @@
 				@update:model-value="onPageSizeChange" density="compact"></v-select>
 		</div>
 		<div class="selected_records" v-if="show_selected_records && selected_records.length > 0">
-			<div class="record" v-for="(record, index) in selected_records">
-				<span class="label"> {{ record[selected_record_label] }}</span>
+			<div class="record" v-for="(record, index) in selected_records" :key="index">
+				<span class="label">{{ getRecordLabel(record) }}</span>
 				<div class="actions">
 					<v-btn @click="onClickRemoveRecord(index)" density="compact" icon="mdi-close-circle"
 						variant="text"></v-btn>
@@ -26,7 +26,7 @@ const emit = defineEmits(["update:pagination", "update:selected_records"]);
 
 // Model
 const pagination = defineModel('pagination', { default: new Pagination() });
-const selected_records = defineModel('selected_records', { default: [] });
+const selected_records = defineModel('selected_records', { default: () => [] });
 
 // Props
 const { show_selected_records, selected_record_label } = defineProps({
@@ -41,6 +41,20 @@ const { show_selected_records, selected_record_label } = defineProps({
 });
 
 // Functions
+function getRecordLabel(record) {
+	if (!record) {
+		return '';
+	}
+
+	const labeled = record[selected_record_label];
+	if (labeled != null && labeled !== '') {
+		return labeled;
+	}
+
+	// Fallback when record has no field matching selected_record_label (default "label")
+	return record.name ?? record.title ?? record.code ?? record.id ?? '';
+}
+
 function onPaginationChange() {
 	emit("update:pagination", pagination.value);
 }
@@ -54,9 +68,7 @@ function onPageSizeChange() {
 function onClickRemoveRecord(index) {
 	// Un-select
 	selected_records.value[index].select_box = false;
-	selected_records.value.splice(index, 1);
-
-	emit("update:selected_records", selected_records.value);
+	selected_records.value = selected_records.value.filter((_, i) => i !== index);
 }
 
 </script>

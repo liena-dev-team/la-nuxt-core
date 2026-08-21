@@ -300,11 +300,19 @@ function onSelectRowSubMenuItem(data) {
 			};
 			break;
 		case PAGE_LIST_DROPDOWN_MENU_ITEM_TYPE.SELECT_MORE: // Show More
-			selected_records.value.push(data.record);
-
-			showSelectBox(!show_selectbox.value);
-
-			emit("update:selected_records", selected_records.value);
+			if (!show_selectbox.value) {
+				selected_records.value = [...selected_records.value, data.record];
+				showSelectBox(true);
+			} else {
+				const code = data?.primary_field?.code;
+				const already = selected_records.value.some(
+					(r) => code && r[code] == data.record[code]
+				);
+				if (!already) {
+					selected_records.value = [...selected_records.value, data.record];
+				}
+				data.record.select_box = true;
+			}
 			break;
 	}
 }
@@ -338,45 +346,31 @@ function onSelectHeaderSubMenuItem(header, e) {
 
 function onRecordSelected(primary_field, is_selected, record) {
 	if (primary_field) {
-		if (!select_multiple) {
-			records.value.forEach((record) => {
-				record.select_box = false;
+		// Single-select only when select_mode is on without select_multiple.
+		// "Select More" opens checkboxes for multi-select even if select_multiple=false.
+		if (select_mode && !select_multiple) {
+			records.value.forEach((r) => {
+				r.select_box = false;
 			});
-
-			// Delete previous selected records
-			for (let i in selected_records.value) {
-				selected_records.value.splice(i, 1);
-			}
+			selected_records.value = [];
 		}
 
 		if (is_selected) {
-			// Search if there is existing record
-			let has_added = false;
-			for (let i in selected_records.value) {
-				if (selected_records.value[i][primary_field.code] == primary_field.value) {
-					has_added = true;
-					break;
-				}
-			}
-
+			const has_added = selected_records.value.some(
+				(r) => r[primary_field.code] == primary_field.value
+			);
 			if (!has_added) {
-				selected_records.value.push(record);
+				selected_records.value = [...selected_records.value, record];
 			}
 		} else {
-			// Delete from selected_record
-			for (let i in selected_records.value) {
-				if (selected_records.value[i][primary_field.code] == primary_field.value) {
-					selected_records.value.splice(i, 1);
-					break;
-				}
-			}
+			selected_records.value = selected_records.value.filter(
+				(r) => r[primary_field.code] != primary_field.value
+			);
 
 			if (selected_records.value.length <= 0) {
 				showSelectBox(false);
 			}
 		}
-
-		emit("update:selected_records", selected_records.value);
 	}
 }
 
@@ -457,11 +451,11 @@ async function onDoFilter(reset_page = false) {
 
 	sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
 
-	// Make filters: 
+	// Make filters:
 	let filters = [];
-	// Combine with initial filter request
+	// Combine with initial filter request (copy to avoid mutating the prop)
 	if (initial_filters && initial_filters.length > 0) {
-		filters = initial_filters;
+		filters = [...initial_filters];
 	}
 	
 	// Convert added filters to class FilterRequest
@@ -526,26 +520,26 @@ async function onDoFilter(reset_page = false) {
 }
 
 function onSelectedAll(is_selected_all) {
-	Object.entries(records.value).forEach(([key, record]) => {
-		const id = record[primary_field.value.code];
-		if (id) {
-			if (is_selected_all) {
-				selected_records.value.push(record);
+	if (is_selected_all) {
+		const next = [...selected_records.value];
+		Object.entries(records.value).forEach(([key, record]) => {
+			const id = record[primary_field.value.code];
+			if (id) {
+				const already = next.some((r) => r[primary_field.value.code] == id);
+				if (!already) {
+					next.push(record);
+				}
+				record[PAGE_LIST_HEADER_TYPE.SELECT_BOX] = true;
 			}
-
-			record[PAGE_LIST_HEADER_TYPE.SELECT_BOX] = is_selected_all;
-		}
-	});
-
-	if (!is_selected_all) {
-		selected_records.value.splice(0);
-	}
-
-	if (selected_records.value.length <= 0) {
+		});
+		selected_records.value = next;
+	} else {
+		Object.entries(records.value).forEach(([key, record]) => {
+			record[PAGE_LIST_HEADER_TYPE.SELECT_BOX] = false;
+		});
+		selected_records.value = [];
 		showSelectBox(false);
 	}
-
-	emit("update:selected_records", selected_records.value);
 }
 
 function goNewRecord() {

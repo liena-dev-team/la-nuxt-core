@@ -264,6 +264,7 @@ const field_errors = ref({});
 const all_fields = ref({});
 const current_edit_record = ref();
 const is_initializing = ref(true);
+let syncing_selection = false;
 
 let pagination = reactive(new Pagination());
 const saved_expressions = reactive({});
@@ -345,6 +346,10 @@ function onSelectHeaderSubMenuItem(header, e) {
 }
 
 function onRecordSelected(primary_field, is_selected, record) {
+	if (syncing_selection) {
+		return;
+	}
+
 	if (primary_field) {
 		// Single-select only when select_mode is on without select_multiple.
 		// "Select More" opens checkboxes for multi-select even if select_multiple=false.
@@ -731,19 +736,20 @@ async function requestLayout() {
 	return response_data.result;
 }
 
-function onSelectedRecordsChange() {
-	// Update records select box
+function onSelectedRecordsChange(next_records) {
+	const next = Array.isArray(next_records) ? next_records : [];
+	const code = primary_field.value?.code;
+
+	// Ignore checkbox echoes while checkboxes are synced from the chip list.
+	// Re-emitting selected_records here would send the previous list and undo the removal.
+	syncing_selection = true;
 	records.value.forEach((record) => {
-		record.select_box = false;
-
-		for (let i in selected_records.value) {
-			if (selected_records.value[i][primary_field.value.code] == record[primary_field.value.code]) {
-				record.select_box = true;
-			}
-		}
+		const id = code ? record[code] : undefined;
+		record.select_box = !!code && next.some((item) => item?.[code] == id);
 	});
-
-	emit("update:selected_records", selected_records.value);
+	nextTick(() => {
+		syncing_selection = false;
+	});
 }
 
 function onClickRecord(record) {

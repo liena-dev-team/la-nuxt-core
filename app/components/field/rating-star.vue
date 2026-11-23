@@ -1,7 +1,7 @@
 <template>
 	<div class="la-rating-star">
 		<v-rating v-model="ratingValue" :length="max" :readonly="mode === 'view'" active-color="yellow"
-			color="grey-lighten-1" density="compact" />
+			color="grey-lighten-1" density="compact" half-increments />
 	</div>
 </template>
 
